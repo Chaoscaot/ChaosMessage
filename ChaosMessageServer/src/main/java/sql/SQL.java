@@ -1,6 +1,6 @@
 package sql;
 
-import main.Main;
+import util.Logging;
 
 import java.sql.*;
 
@@ -29,7 +29,7 @@ public class SQL {
             if(con != null)
                 con.close();
         }catch (SQLException e) {
-            Main.log("Could not close SQL-Connection", e);
+            Logging.log("Could not close SQL-Connection", e);
         }
     }
 
