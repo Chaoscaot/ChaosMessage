@@ -22,4 +22,4 @@
 # Extra
 .sync/
 Icon*
-/config.json
+config.json
