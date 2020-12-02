@@ -18,7 +18,7 @@ public class Logging {
         handler.setFormatter(new Formatter() {
             @Override
             public String format(LogRecord record) {
-                return "[" + Timestamp.from(Instant.now()).toLocalDateTime().format(Main.DATE_FORMAT) + "] [" + record.getLevel() + "] " + record.getMessage();
+                return "[" + Timestamp.from(Instant.now()).toLocalDateTime().format(Main.DATE_FORMAT) + "] [" + record.getLevel() + "] " + record.getMessage() + "\n";
             }
         });
 
