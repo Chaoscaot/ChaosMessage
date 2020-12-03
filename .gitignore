@@ -23,4 +23,5 @@
 .sync/
 Icon*
 config.json
-key.private
+private.key
+public.key

@@ -41,5 +41,6 @@ public class Logging {
 
     public static void log(String message, Throwable e) {
         log(Level.SEVERE, message, e);
+        e.printStackTrace();
     }
 }

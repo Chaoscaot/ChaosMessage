@@ -1,4 +1,4 @@
-package network.packets;
+package network;
 
 import main.Main;
 import yapion.annotations.object.YAPIONData;
@@ -39,7 +39,7 @@ public class MessageObject {
     private void decrypt() {
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, Main.getServer().getPrivateKey());
+            cipher.init(Cipher.DECRYPT_MODE, Main.pair.getPrivate());
             bytes = cipher.doFinal(message.getBytes());
             message = new String(bytes);
         } catch (Exception e) {

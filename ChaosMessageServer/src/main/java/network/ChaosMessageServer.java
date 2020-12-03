@@ -1,15 +1,13 @@
 package network;
 
-import com.ibm.jvm.Log;
 import util.Logging;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -48,21 +46,21 @@ public class ChaosMessageServer {
     }
 
     private void initKeys() {
-        File privateFile = new File(System.getProperty("user.home") + "/MessageServer/private.key");
-        File publicFile = new File(System.getProperty("user.home") + "/MessageServer/public.key");
+        File privateFile = new File("private.key");
+        File publicFile = new File("public.key");
         if(!privateFile.exists() || !publicFile.exists()) {
-            privateFile.getParentFile().mkdirs();
             try {
                 privateFile.createNewFile();
                 publicFile.createNewFile();
-                createNewKeys(privateFile, publicFile);
+                createNewKeys();
             } catch (Exception e) {
                 Logging.log("Could not Create Key Files", e);
+                e.printStackTrace();
                 System.exit(1);
             }
         }
         try {
-            keyPair = new KeyPair(readPublicKey(privateFile.getAbsolutePath()), readPrivateKey(privateFile.getAbsolutePath()));
+            readKeys();
         } catch (Exception e) {
             Logging.log("Could not Load Keys", e);
             e.printStackTrace();
@@ -70,37 +68,63 @@ public class ChaosMessageServer {
         }
     }
 
-    private void createNewKeys(File privateFile, File publicFile) throws NoSuchAlgorithmException, IOException {
+    private void createNewKeys() throws NoSuchAlgorithmException, IOException {
         KeyPair pair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
-        X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(pair.getPublic().getEncoded());
-        PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(pair.getPrivate().getEncoded());
-        writeFileBytes(publicSpec.getEncoded(), publicFile.getAbsolutePath());
-        writeFileBytes(privateSpec.getEncoded(), privateFile.getAbsolutePath());
+        PrivateKey privateKey = pair.getPrivate();
+        PublicKey publicKey = pair.getPublic();
+
+        // Store Public Key.
+        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(
+                publicKey.getEncoded());
+        FileOutputStream fos = new FileOutputStream("public.key");
+        fos.write(x509EncodedKeySpec.getEncoded());
+        fos.close();
+
+        // Store Private Key.
+        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
+                privateKey.getEncoded());
+        fos = new FileOutputStream("private.key");
+        fos.write(pkcs8EncodedKeySpec.getEncoded());
+        fos.close();
     }
 
-    private void writeFileBytes(byte[] bytes, String filename) throws IOException {
-        Path path = Paths.get(filename);
-        Files.write(path, bytes);
-    }
+    private void readKeys() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        // Read Public Key.
+        File filePublicKey = new File("public.key");
+        FileInputStream fis = new FileInputStream(filePublicKey);
+        byte[] encodedPublicKey = new byte[(int) filePublicKey.length()];
+        fis.read(encodedPublicKey);
+        fis.close();
 
-    private byte[] readFileBytes(String filename) throws IOException {
-        Path path = Paths.get(filename);
-        return Files.readAllBytes(path);
-    }
+        // Read Private Key.
+        File filePrivateKey = new File("private.key");
+        fis = new FileInputStream(filePrivateKey);
+        byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
+        fis.read(encodedPrivateKey);
+        fis.close();
 
-    private PublicKey readPublicKey(String filename) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(readFileBytes(filename));
+        // Generate KeyPair.
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePublic(publicSpec);
-    }
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(
+                encodedPublicKey);
+        PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
-    private PrivateKey readPrivateKey(String filename) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(readFileBytes(filename));
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePrivate(keySpec);
+        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
+                encodedPrivateKey);
+        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
+
+        keyPair = new KeyPair(publicKey, privateKey);
     }
 
     public List<ChaosMessageSocket> getSockets() {
         return sockets;
+    }
+
+    public PublicKey getPublicKey() {
+        return keyPair.getPublic();
+    }
+
+    public PrivateKey getPrivateKey() {
+        return keyPair.getPrivate();
     }
 }

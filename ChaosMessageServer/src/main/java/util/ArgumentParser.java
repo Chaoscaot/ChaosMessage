@@ -44,12 +44,5 @@ public class ArgumentParser {
         public String getKey(String key) {
             return mappings.get(key);
         }
-
-        @Override
-        public String toString() {
-            return "ArgumentMapping{" +
-                    "mappings=" + mappings +
-                    '}';
-        }
     }
 }
