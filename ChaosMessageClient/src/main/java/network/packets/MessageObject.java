@@ -1,35 +1,33 @@
-package network;
+package network.packets;
 
 import main.Main;
+import network.CipherUtils;
 import yapion.annotations.object.YAPIONData;
 import yapion.annotations.object.YAPIONPostDeserialization;
 import yapion.annotations.object.YAPIONPreSerialization;
 import yapion.exceptions.YAPIONException;
 
-import javax.crypto.Cipher;
 import java.security.PublicKey;
 
 @YAPIONData
 public class MessageObject {
-    private transient String message;
-    private byte[] bytes = null;
+    private transient String internalMessage;
+    private String message = null;
     public transient PublicKey publicKey;
 
     public MessageObject(String message, PublicKey publicKey) {
-        this.message = message;
+        this.internalMessage = message;
         this.publicKey = publicKey;
     }
 
     public String getMessage() {
-        return message;
+        return internalMessage;
     }
 
     @YAPIONPreSerialization
     private void encrypt() {
         try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            bytes = cipher.doFinal(message.getBytes());
+            message = CipherUtils.encrypt(internalMessage, publicKey);
         } catch (Exception e) {
             throw new YAPIONException("Could not Encrypt", e);
         }
@@ -38,10 +36,7 @@ public class MessageObject {
     @YAPIONPostDeserialization
     private void decrypt() {
         try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, Main.pair.getPrivate());
-            bytes = cipher.doFinal(message.getBytes());
-            message = new String(bytes);
+            internalMessage = CipherUtils.decrypt(message, Main.pair.getPrivate());
         } catch (Exception e) {
             throw new YAPIONException("Could not Decrypt", e);
         }

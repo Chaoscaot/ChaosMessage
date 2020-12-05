@@ -7,10 +7,11 @@ repositories {
     maven {
         url = uri("https://raw.githubusercontent.com/yoyosource/YAPION/master/releases")
     }
+    mavenLocal()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-    implementation 'yoyosource:YAPION:0.20.0'
+    implementation 'yoyosource:YAPION:0.20.2'
 }

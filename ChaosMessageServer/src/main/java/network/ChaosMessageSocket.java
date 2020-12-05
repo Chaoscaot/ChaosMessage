@@ -10,7 +10,6 @@ import yapion.packet.YAPIONOutputStream;
 import yapion.packet.YAPIONPacket;
 import yapion.packet.YAPIONPacketReceiver;
 import yapion.serializing.YAPIONDeserializer;
-import yapion.serializing.YAPIONSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,12 +41,20 @@ public class ChaosMessageSocket {
     private void login() {
         YAPIONPacket packet = new YAPIONPacket("login");
         packet.add("publicKey", Main.getServer().getPublicKey());
+        System.out.println(packet.getYAPION().toString());
         yout.write(packet);
         receiver.add("login", yapionPacket -> {
-            MessageObject object = (MessageObject) YAPIONDeserializer.deserialize(yapionPacket.getYAPION().getObject("message"));
+            MessageObject object = (MessageObject) yapionPacket.get("message");
             YAPIONObject yapionObject = YAPIONUtils.stringGetAllYAPIONObjects(object.getMessage()).get(0);
             key = (PublicKey) YAPIONDeserializer.deserialize(yapionObject.getObject("publicKey"));
             Logging.log(Level.INFO, "Connected with Client! " + socket.getInetAddress().getHostAddress());
+        });
+        receiver.add("@exception", yapionPacket -> {
+            ((Exception) yapionPacket.get("@exception")).printStackTrace();
+            System.out.println(yapionPacket);
+        });
+        receiver.add("@error", yapionPacket -> {
+            System.out.println(yapionPacket);
         });
     }
 }
