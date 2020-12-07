@@ -27,6 +27,7 @@ public class ChaosMessageSocket {
     public final YAPIONInputStream yin;
     private YAPIONPacketReceiver receiver = new YAPIONPacketReceiver();
     public PublicKey key;
+    private Boolean connected;
 
     public ChaosMessageSocket(Socket socket) throws IOException {
         this.socket = socket;
@@ -35,10 +36,11 @@ public class ChaosMessageSocket {
         yout = new YAPIONOutputStream(out);
         yin = new YAPIONInputStream(in);
         yin.setYAPIONPacketReceiver(receiver);
-        login();
+        connected = false;
+        keysync();
     }
 
-    private void login() {
+    private synchronized void keysync() {
         YAPIONPacket packet = new YAPIONPacket("login");
         packet.add("publicKey", Main.getServer().getPublicKey());
         System.out.println(packet.getYAPION().toString());
@@ -48,13 +50,18 @@ public class ChaosMessageSocket {
             YAPIONObject yapionObject = YAPIONUtils.stringGetAllYAPIONObjects(object.getMessage()).get(0);
             key = (PublicKey) YAPIONDeserializer.deserialize(yapionObject.getObject("publicKey"));
             Logging.log(Level.INFO, "Connected with Client! " + socket.getInetAddress().getHostAddress());
+            postKeysync(true);
         });
         receiver.add("@exception", yapionPacket -> {
             ((Exception) yapionPacket.get("@exception")).printStackTrace();
-            System.out.println(yapionPacket);
+            postKeysync(false);
         });
         receiver.add("@error", yapionPacket -> {
-            System.out.println(yapionPacket);
+            postKeysync(false);
         });
+    }
+
+    private void postKeysync(boolean succesfull) {
+
     }
 }

@@ -6,12 +6,10 @@ import util.ArgumentParser;
 import util.Config;
 import util.Logging;
 
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 
 public class Main {
 
-    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
     private static final ArgumentMapper argumentMap = new ArgumentMapper("-");
     private static ChaosMessageServer server;
 

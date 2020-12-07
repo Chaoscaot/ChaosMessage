@@ -19,8 +19,8 @@ public class SQL {
         try {
             con = DriverManager.getConnection(url + "?autoreconnect=true", user, password);
         }catch (SQLException e) {
-            System.exit(0);
-            throw new SecurityException("Could not start SQL-Exception", e);
+            Logging.log("Could not start SQL-Exception", e);
+            System.exit(1);
         }
     }
 

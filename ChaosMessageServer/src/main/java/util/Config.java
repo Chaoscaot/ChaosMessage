@@ -1,16 +1,17 @@
 package util;
 
 import main.Main;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
+import sql.SQL;
 
 import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 
 public class Config {
 
     public static Integer PORT;
+    public static DateTimeFormatter DATE_FORMAT;
 
     public static void loadConfig(String config) {
         File file = new File(config);
@@ -42,13 +43,24 @@ public class Config {
         }
 
         try {
-            JSONObject object = (JSONObject) new JSONParser().parse(new FileReader(file));
+            JSONObject object = new JSONObject(getConfig(file));
             // TODO: 02.12.2020 Load Config
-            PORT = ((Long) object.get("port")).intValue();
+            PORT = object.getInt("port");
+            DATE_FORMAT = DateTimeFormatter.ofPattern(object.getString("dateformat"));
+            //SQL Connection
+            JSONObject sql = (JSONObject) object.get("sql");
+            SQL.connect(sql.getString("url"), sql.getString("user"), sql.getString("password"));
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParseException e) {
-            Logging.log("Could not Parse JSON", e);
         }
+    }
+
+    private static String getConfig(File file) throws IOException {
+        FileReader reader = new FileReader(file);
+        StringBuilder builder = new StringBuilder();
+        while (reader.ready()) {
+            builder.append((char) reader.read());
+        }
+        return builder.toString();
     }
 }

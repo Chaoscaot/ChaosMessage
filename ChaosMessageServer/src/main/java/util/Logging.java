@@ -1,7 +1,5 @@
 package util;
 
-import main.Main;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.logging.*;
@@ -18,7 +16,7 @@ public class Logging {
         handler.setFormatter(new Formatter() {
             @Override
             public String format(LogRecord record) {
-                return "[" + Timestamp.from(Instant.now()).toLocalDateTime().format(Main.DATE_FORMAT) + "] [" + record.getLevel() + "] " + record.getMessage() + "\n";
+                return "[" + Timestamp.from(Instant.now()).toLocalDateTime().format(Config.DATE_FORMAT) + "] [" + record.getLevel() + "] " + record.getMessage() + "\n";
             }
         });
 
