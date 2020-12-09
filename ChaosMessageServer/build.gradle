@@ -15,4 +15,7 @@ dependencies {
     compile group: 'org.json', name: 'json', version: '20201115'
     implementation 'yoyosource:YAPION:0.20.2'
     compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.13'
+    compile group: 'com.google.guava', name: 'guava', version: '30.0-jre'
+    compile group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
+
 }

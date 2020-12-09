@@ -1,6 +1,7 @@
 {
   "port": 9547,
   "dateformat": "dd.MM.yyyy HH:mm:ss",
+  "failed logins": 5,
   "sql": {
     "url": "jdbc:mysql://localhost:3306/message",
     "user": "root",

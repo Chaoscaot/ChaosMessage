@@ -12,6 +12,7 @@ public class Config {
 
     public static Integer PORT;
     public static DateTimeFormatter DATE_FORMAT;
+    public static Integer MAX_FAILED_LOGINS;
 
     public static void loadConfig(String config) {
         File file = new File(config);
@@ -36,6 +37,8 @@ public class Config {
                 writer.flush();
                 reader.close();
                 writer.close();
+                Logging.log(Level.FINEST, "Please Adjust the Configuration");
+                System.exit(0);
             } catch (IOException e) {
                 Logging.log("Could not create Config File", e);
                 System.exit(1);
@@ -47,6 +50,7 @@ public class Config {
             // TODO: 02.12.2020 Load Config
             PORT = object.getInt("port");
             DATE_FORMAT = DateTimeFormatter.ofPattern(object.getString("dateformat"));
+            MAX_FAILED_LOGINS = object.getInt("failed logins");
             //SQL Connection
             JSONObject sql = (JSONObject) object.get("sql");
             SQL.connect(sql.getString("url"), sql.getString("user"), sql.getString("password"));

@@ -1,19 +1,20 @@
 package network;
 
+import util.Config;
 import util.Logging;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ChaosMessageServer {
@@ -22,6 +23,8 @@ public class ChaosMessageServer {
     private List<ChaosMessageSocket> sockets;
     private Thread thread;
     private KeyPair keyPair;
+    private UUID id;
+    private final Map<String, Integer> failedLogins = new HashMap<>();
 
     public ChaosMessageServer(int port) {
         sockets = new ArrayList<>();
@@ -33,6 +36,11 @@ public class ChaosMessageServer {
                 while (!server.isClosed()) {
                     try {
                         Socket socket = server.accept();
+                        if(failedLogins.containsKey(socket.getInetAddress().getHostAddress()) &&
+                            failedLogins.get(socket.getInetAddress().getHostAddress()) > Config.MAX_FAILED_LOGINS) {
+                            socket.close();
+                            continue;
+                        }
                         sockets.add(new ChaosMessageSocket(socket));
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -43,6 +51,10 @@ public class ChaosMessageServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Integer addFailedLogin(String address) {
+        return failedLogins.put(address, failedLogins.get(address));
     }
 
     private void initKeys() {
@@ -126,5 +138,17 @@ public class ChaosMessageServer {
 
     public PrivateKey getPrivateKey() {
         return keyPair.getPrivate();
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public void clearCache() {
+        failedLogins.clear();
     }
 }
